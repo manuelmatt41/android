@@ -1,12 +1,13 @@
 package com.example.tema3;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
@@ -15,6 +16,12 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         reset();
         countNumber();
         showRadioToast();
+        openNewActivity();
     }
 
     private void updateCheckBox() {
@@ -113,4 +121,29 @@ public class MainActivity extends AppCompatActivity {
         ((RadioButton)findViewById(R.id.radioButton)).setOnClickListener(click);
         ((RadioButton)findViewById(R.id.radioButton2)).setOnClickListener(click);
     }
+
+    private void openNewActivity() {
+        ((ImageButton)findViewById(R.id.saveButton)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, MainActivity2.class);
+                intent.putExtra("nombre", ((EditText)findViewById(R.id.editTextTextPersonName)).getText().toString());
+                intent.putExtra("stars", ((RatingBar)findViewById(R.id.ratingBar)).getRating());
+                launcher.launch(intent);
+            }
+        });
+    }
+
+    ActivityResultLauncher<Intent> launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+            if (result.getResultCode() == RESULT_OK) {
+                Intent intentReturn = result.getData();
+                float stars = intentReturn.getFloatExtra("stars", Float.MAX_VALUE);
+                ((TextView)findViewById(R.id.textViewCount)).setText( stars + "");
+                ((RatingBar)findViewById(R.id.ratingBar)).setRating(stars);
+                Log.i("Stars", stars + "");
+            }
+        }
+    });
 }
