@@ -1,3 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"/>
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/newActivity"
+        android:title="Nuevo"
+        app:showAsAction="always|withText" />
+    <item
+        android:id="@+id/clean"
+        android:icon="@android:drawable/ic_notification_clear_all"
+        android:title="Clean"
+        app:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/editText"
+        android:title="Editar"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/subMenu"
+        android:title="Sub" >
+        <menu >
+            <item
+                android:id="@+id/opc1"
+                android:title="opc1"
+                android:onClick="mostrarOpcion"/>
+            <item
+                android:id="@+id/opc2"
+                android:title="opc2"
+                android:onClick="mostrarOpcion"/>
+        </menu>
+    </item>
+</menu>

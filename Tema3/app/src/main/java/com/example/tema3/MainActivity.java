@@ -3,6 +3,8 @@ package com.example.tema3;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -21,6 +23,8 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,6 +40,40 @@ public class MainActivity extends AppCompatActivity {
         countNumber();
         showRadioToast();
         openNewActivity();
+        callOnClik();
+        mostrarActionBar();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.newActivity:
+                Intent intent = new Intent(MainActivity.this, MainActivity3.class);
+                boolean[] checkedBoxes = new boolean[3];
+                checkedBoxes[0] = ((CheckBox) findViewById(R.id.checkBox)).isChecked();
+                checkedBoxes[1] = ((CheckBox) findViewById(R.id.checkBox2)).isChecked();
+                checkedBoxes[2] = ((CheckBox) findViewById(R.id.checkBox3)).isChecked();
+                intent.putExtra("checkedBoxes", checkedBoxes);
+                startActivity(intent);
+                break;
+            case R.id.clean:
+                ((Button) findViewById(R.id.buttonNormal)).callOnClick();
+                break;
+            case R.id.editText:
+                ((EditText) findViewById(R.id.editTextTextPersonName)).setText("");
+                break;
+        }
+        return true;
+    }
+
+    public void mostrarOpcion(MenuItem menuItem) {
+        Toast.makeText(this, menuItem.getTitle(), Toast.LENGTH_SHORT).show();
     }
 
     private void updateCheckBox() {
@@ -53,7 +91,9 @@ public class MainActivity extends AppCompatActivity {
         sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                ((TextView) findViewById(R.id.textViewNumber)).setText(sb.getProgress() + "");
+                int progress = sb.getProgress();
+                ((TextView) findViewById(R.id.textViewNumber)).setText(progress + "");
+                getSupportActionBar().setSubtitle(progress + "");
             }
 
             @Override
@@ -118,17 +158,17 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), ((RadioButton) view).getText().toString(), Toast.LENGTH_SHORT).show();
             }
         };
-        ((RadioButton)findViewById(R.id.radioButton)).setOnClickListener(click);
-        ((RadioButton)findViewById(R.id.radioButton2)).setOnClickListener(click);
+        ((RadioButton) findViewById(R.id.radioButton)).setOnClickListener(click);
+        ((RadioButton) findViewById(R.id.radioButton2)).setOnClickListener(click);
     }
 
     private void openNewActivity() {
-        ((ImageButton)findViewById(R.id.saveButton)).setOnClickListener(new View.OnClickListener() {
+        ((ImageButton) findViewById(R.id.saveButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, MainActivity2.class);
-                intent.putExtra("nombre", ((EditText)findViewById(R.id.editTextTextPersonName)).getText().toString());
-                intent.putExtra("stars", ((RatingBar)findViewById(R.id.ratingBar)).getRating());
+                intent.putExtra("nombre", ((EditText) findViewById(R.id.editTextTextPersonName)).getText().toString());
+                intent.putExtra("stars", ((RatingBar) findViewById(R.id.ratingBar)).getRating());
                 launcher.launch(intent);
             }
         });
@@ -140,10 +180,39 @@ public class MainActivity extends AppCompatActivity {
             if (result.getResultCode() == RESULT_OK) {
                 Intent intentReturn = result.getData();
                 float stars = intentReturn.getFloatExtra("stars", Float.MAX_VALUE);
-                ((TextView)findViewById(R.id.textViewCount)).setText( stars + "");
-                ((RatingBar)findViewById(R.id.ratingBar)).setRating(stars);
+                ((TextView) findViewById(R.id.textViewCount)).setText(stars + "");
+                ((RatingBar) findViewById(R.id.ratingBar)).setRating(stars);
                 Log.i("Stars", stars + "");
             }
         }
     });
+
+    private void callOnClik() {
+        Button btnCall = findViewById(R.id.btnCall);
+        btnCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent callIntent = new Intent(Intent.ACTION_CALL);
+//                String[] a = {Manifest.permission.CALL_PHONE};
+//                requestPermissions(a, 1001);
+//                callIntent.setData(Uri.parse("tel:" + 600703815)); Para hacer llamada se necesita el permiso para llamar
+                startActivity(callIntent);
+            }
+        });
+    }
+
+    private void mostrarActionBar() {
+        Button btnMostrar = findViewById(R.id.btnMostrar);
+        btnMostrar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ActionBar ac = getSupportActionBar();
+                if (ac.isShowing()) {
+                    ac.hide();
+                } else {
+                    ac.show();
+                }
+            }
+        });
+    }
 }
