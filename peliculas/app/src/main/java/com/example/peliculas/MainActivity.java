@@ -1,11 +1,21 @@
 package com.example.peliculas;
 
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.widget.GridLayout;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,27 +24,94 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
+    ActivityResultLauncher<Intent> launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+            if (result.getResultCode() == RESULT_OK) {
+                Intent intentData = result.getData();
+                movies = (ArrayList<Pelicula>) intentData.getSerializableExtra("movies");
+            }
+        }
+    });
+    ActivityResultLauncher<Intent> launcher2;
+    ArrayList<Pelicula> movies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ArrayList<Pelicula> movies = rellenaPeliculas();
+        movies = rellenaPeliculas();
         RecyclerView rc = findViewById(R.id.rvPeliculas);
-        GridLayoutManager gridLayout = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
+        GridLayoutManager gridLayout = new GridLayoutManager(this, 1, GridLayoutManager.VERTICAL, false);
+        AdapterPeliculas adapterPeliculas = new AdapterPeliculas(movies);
+
+        View.OnClickListener listener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (adapterPeliculas.getSelectedPos() == RecyclerView.NO_POSITION) {
+                    ((TextView) findViewById(R.id.textViewPeliculaSeleccionada)).setVisibility(View.INVISIBLE);
+                } else {
+                    ((TextView) findViewById(R.id.textViewPeliculaSeleccionada)).setVisibility(View.VISIBLE);
+                    ((TextView) findViewById(R.id.textViewPeliculaSeleccionada)).setText(movies.get(adapterPeliculas.getSelectedPos()).titulo);
+                }
+            }
+        };
+
+        adapterPeliculas.setListener(listener);
         rc.setLayoutManager(gridLayout);
+        rc.setAdapter(adapterPeliculas);
+
+        ((Button) findViewById(R.id.btnOcultar)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ActionBar ac = getSupportActionBar();
+                if (ac.isShowing()) {
+                    ac.hide();
+                } else {
+                    ac.show();
+                }
+            }
+        });
+        launcher2 = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == RESULT_OK) {
+                    Intent intentData = result.getData();
+                    Pelicula pelicula = (Pelicula) intentData.getSerializableExtra("movie");
+                    movies.add(pelicula);
+                    adapterPeliculas.notifyItemInserted(movies.size() - 1);
+                }
+            }
+        });
     }
 
-    public void watchYoutubeVideo(String id) {
-        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
-        Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + id));
-        try {
-            startActivity(appIntent);
-        } catch (ActivityNotFoundException ex) {
-            startActivity(webIntent);
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.miListado:
+                Intent intent = new Intent(MainActivity.this, ListadoCompletoActivity.class);
+                intent.putExtra("movies", movies);
+                launcher.launch(intent);
+                break;
+            case R.id.miFavoritos:
+                Intent intentF = new Intent(MainActivity.this, FavoritosActivity.class);
+                intentF.putExtra("movies", movies);
+                launcher.launch(intentF);
+                break;
+            case R.id.miAnyadir:
+                Intent intentA = new Intent(MainActivity.this, AnyadirActivity.class);
+                launcher2.launch(intentA);
+                break;
         }
+        return true;
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_peliculas, menu);
+        return true;
+    }
 
     public ArrayList<Pelicula> rellenaPeliculas() {
 

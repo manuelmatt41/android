@@ -11,8 +11,6 @@ public class Pelicula implements Serializable{
     Date fecha;
     boolean favorita;
 
-    private SimpleDateFormat dateformat = new SimpleDateFormat("dd-MM-yyyy");
-
     public Pelicula(String titulo, String director, int duracion, Date fecha, String sala, int clasi, int portada) {
         this.clasi=clasi;
         this.director=director;

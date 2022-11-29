@@ -7,4 +7,6 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="rv_peliculas_backcolor">#918B87</color>
+    <color name="rv_peliculas_backcolor_selected">#B37247</color>
 </resources>
